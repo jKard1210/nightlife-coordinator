@@ -1,7 +1,11 @@
 module.exports = function(app, passport) {
 
 var mongoose = require('mongoose');
+const yelp = require('yelp-fusion');
         var db = require('../../config/database.js');
+        
+        const clientId = 'fcrJc79YtvNqTifSpY6uMA';
+        const clientSecret = '3wQCiXAG3VExFCd3eeiyTYJTd0Bz5jljb6nntkbcfrjzyn35eMpxIovTzECLU7n7';
         
         var Schema = mongoose.Schema;
          var pollSchema = new Schema({
@@ -51,20 +55,34 @@ app.post('/login', passport.authenticate('local-login', {
     }));
     
      app.get('/front', function(req, res) {
+         
         res.render('front.ejs'); 
     });
 
-    app.get('/home', isLoggedIn, function(req, res) {
+    app.get('/home', function(req, res) {
+    const searchRequest = {
+  location: req.query.zip,
+  term: "bar"
+    };
 
+    yelp.accessToken(clientId, clientSecret).then(response => {
+  const client = yelp.client(response.jsonBody.access_token);
 
-        poll.find({}, function(err, data){
-        if (err) console.log(err);
-        console.log(">>>> " + data);
+  client.search(searchRequest).then(response => {
+   const results = response.jsonBody.businesses;
+   const prettyJson = JSON.stringify(results, null, 4);
+    console.log(results);
         res.render('home.ejs', {
-            user: req.user,
-            data: data
+            data: results,
+            log: isLoggedIn
         });
-    });
+  });
+}).catch(e => {
+  console.log(e);
+});
+
+      
+
 
     });
     
