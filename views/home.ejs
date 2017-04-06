@@ -35,7 +35,8 @@
                     
                     
                     <% entries = data.map(function(elem) {
-    return '<div class = "well"><img src="' + elem.image_url + '" style = "height:60px; width: 60px"><button>Click Here</button> <h3>' + elem.name + '</h3></div>';
+                        
+    return '<div class = "well"><img src="' + elem.image_url + '" style = "height:60px; width: 60px"><button action = "/vote/53588" method = "post" id = "' + elem.id + '">Click Here</button> <h3>' + elem.name + '</h3></div>';
 }) -%>
 <p><%- entries.join("") %></p>
 

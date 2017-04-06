@@ -42,5 +42,5 @@ require('./app/models/routes.js')(app, passport); // load our routes and pass in
 
 app.listen(port, function () {
   console.log('Example app listening on port 3000!')
-})
+});
 
