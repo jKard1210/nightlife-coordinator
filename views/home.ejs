@@ -7,12 +7,12 @@
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
     <style>
         body        { padding-top:80px; word-wrap:break-word; background-image: url("https://journeythroughmycameralens.files.wordpress.com/2012/01/city4.jpg"); opacity: 80% }
-        h3 { text-align: center; }
+        h3 { text-align: center; margin-left: 10px; }
         form {text-align: center;}
         label {padding-right: 25px; padding-left: 25px; text-size: 40px;}
         .subButton {margin-top: 15px;}
         img { float: left; padding-bottom: 5px; padding-top: 5px;}
-        button {float: right; margin-top: 25px; height: 30px; width: 100px;}
+        input {float: right; margin-top: 10px; height: 30px; width: 200px;}
 
         
     </style>
@@ -21,22 +21,21 @@
 
 <div class="container">
     <div class = "text-center">
-     <a href="/logout" class="btn btn-default btn-sm" style= "width: 150px;">Logout</a>
+        <a class="btn btn-default btn-sm" style= "width: 150px" href = "/front">Switch Location</a>
      </div>
     <div class="page-header text-center">
-        <h1 style = "color: maroon" id = "polls"><span class="fa"></span>Nearby Nightlife Destinations</h1>
+        <h1 style = "color: white" id = "polls"><span class="fa"></span>Nearby Nightlife Destinations</h1>
     </div>
 
     <div class="row">
 
         <!-- LOCAL INFORMATION -->
 
-           <% console.log(data) -%>
                     
                     
                     <% entries = data.map(function(elem) {
                         
-    return '<div class = "well"><img src="' + elem.image_url + '" style = "height:60px; width: 60px"><button action = "/vote/53588" method = "post" id = "' + elem.id + '">Click Here</button> <h3>' + elem.name + '</h3></div>';
+    return '<div class = "well"><img src="' + elem.image_url + '" style = "height:60px; width: 60px"><form action =  "/vote/' + zip + '/' + elem.name + '" method = "get"><input type = "submit" value = "Check In (' + elem.votes + ')"</input></form> <h3>' + elem.name +  '</h3></div>';
 }) -%>
 <p><%- entries.join("") %></p>
 

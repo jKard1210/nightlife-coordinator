@@ -6,12 +6,13 @@ const yelp = require('yelp-fusion');
         
         const clientId = 'fcrJc79YtvNqTifSpY6uMA';
         const clientSecret = '3wQCiXAG3VExFCd3eeiyTYJTd0Bz5jljb6nntkbcfrjzyn35eMpxIovTzECLU7n7';
+        var results;
         
         var Schema = mongoose.Schema;
          var placeSchema = new Schema({
                 name: String,
                 location: String,
-                votes: Number,
+                votes: Number
          });
 
         var place = mongoose.model('places', placeSchema);
@@ -29,7 +30,7 @@ const yelp = require('yelp-fusion');
 
 
 app.post('/login', passport.authenticate('local-login', {
-        successRedirect : '/home', // redirect to the secure profile section
+        successRedirect : '/front', // redirect to the secure profile section
         failureRedirect : '/login', // redirect back to the signup page if there is an error
         failureFlash : true // allow flash messages
     }));
@@ -42,35 +43,20 @@ app.post('/login', passport.authenticate('local-login', {
     
     
    app.post('/signup', passport.authenticate('local-signup', {
-        successRedirect : '/home', // redirect to the secure profile section
+        successRedirect : '/front', // redirect to the secure profile section
         failureRedirect : '/signup', // redirect back to the signup page if there is an error
         failureFlash : true // allow flash messages
     }));
     
-    app.post('/vote/:zip', isLoggedIn, function(req, res) {
+    app.get('/vote/:zip/:name', isLoggedIn, function(req, res) {
         var zip = req.params.zip;
-        var id = req.query.id;
-       place.findOneAndUpdate({'name': id}, {$inc: { "votes" : 1}}, function(err, data) {
+        var name = req.params.name;
+        console.log(zip);
+        console.log(name);
+       place.findOneAndUpdate({'name': name}, {$inc: { "votes" : 1}}, function(err, data) {
             if (err) console.log(err);
-            const searchRequest = {
-             location: zip,
-            term: "bar"
-             };
-
-            yelp.accessToken(clientId, clientSecret).then(response => {
-            const client = yelp.client(response.jsonBody.access_token);
-
-            client.search(searchRequest).then(response => {
-            const results = response.jsonBody.businesses;
-            const prettyJson = JSON.stringify(results, null, 4);
-            res.render('home.ejs', {
-            data: results,
-            log: isLoggedIn,
-            zip: zip
-        });
-               
-           })
-        });
+            res.redirect('/home?zip=' + zip);
+            
     })
     });
     
@@ -90,20 +76,22 @@ app.post('/login', passport.authenticate('local-login', {
   const client = yelp.client(response.jsonBody.access_token);
 
   client.search(searchRequest).then(response => {
-   const results = response.jsonBody.businesses;
-   const prettyJson = JSON.stringify(results, null, 4);
-   console.log(prettyJson);
+   results = response.jsonBody.businesses;
+   var prettyJson = JSON.stringify(results, null, 4);
    results.forEach(function(obj) {
-       console.log(obj);
        place.findOne({
            "name": obj.name,
            "location": obj.location.city 
        }, function(err, item) {
            if(err) console.log("a");
-           if (item) console.log(item);
+           if (item) { 
+               obj.votes = 1;
+               obj.votes = item.votes;
+           }
+           
            else {
-               console.log(obj.name);
-                var newPlace = new place({
+            obj.votes = 0;
+            var newPlace = new place({
             "name" : obj.name,
             "location": obj.location.city,
             "votes": 0
@@ -115,12 +103,14 @@ app.post('/login', passport.authenticate('local-login', {
                 });
            }
        })
+
+
             })
-       
-     res.render('home.ejs', {
+     setTimeout(function() {res.render('home.ejs', {
             data: results,
             zip: req.query.zip
-        });  
+        }); 
+     }, 1000);
    });
   }).catch(e => {
   console.log(e);
@@ -153,6 +143,7 @@ app.post('/login', passport.authenticate('local-login', {
 
 };
 
+
 function isLoggedIn(req, res, next) {
 
     // if user is authenticated in the session, carry on 
@@ -160,6 +151,6 @@ function isLoggedIn(req, res, next) {
         return next();
 
     // if they aren't redirect them to the home page
-    res.redirect('/');
+    res.redirect('/login');
 }
 
